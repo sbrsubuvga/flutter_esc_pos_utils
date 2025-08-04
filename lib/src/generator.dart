@@ -654,63 +654,10 @@ class Generator {
     return bytes;
   }
 
-  List<int> quickImage1(Image imgSrc,
-      {PosAlign align = PosAlign.center, bool isDoubleDensity = true}) {
-    final bytesBuilder = BytesBuilder(copy: false);
-
-    // Image alignment
-    bytesBuilder.add(setStyles(const PosStyles().copyWith(align: align)));
-
-    Image image;
-    if (!isDoubleDensity) {
-      int size = 558 ~/ 2;
-      if (_paperSize == PaperSize.mm58) {
-        size = 375 ~/ 2;
-      } else if (_paperSize == PaperSize.mm72) {
-        size = 503 ~/ 2;
-      }
-      image =
-          copyResize(imgSrc, width: size, interpolation: Interpolation.linear);
-    } else {
-      image = Image.from(imgSrc);
-    }
-
-    invert(image);
-    flipHorizontal(image);
-    final Image imageRotated = copyRotate(image, angle: 270);
-
-    final int lineHeight = isDoubleDensity ? 3 : 1;
-    final List<List<int>> blobs = _toColumnFormat(imageRotated, lineHeight * 8);
-
-    for (int blobInd = 0; blobInd < blobs.length; blobInd++) {
-      blobs[blobInd] = _packBitsIntoBytes(blobs[blobInd]);
-    }
-
-    final int heightPx = imageRotated.height;
-    int densityByte = (isDoubleDensity ? 1 : 0) + (isDoubleDensity ? 32 : 0);
-
-    final List<int> header = List.from(cBitImg.codeUnits)
-      ..add(densityByte)
-      ..addAll(_intLowHigh(heightPx, 2));
-
-    // Adjust line spacing
-    bytesBuilder.add([27, 51, 0]);
-
-    for (final blob in blobs) {
-      bytesBuilder.add(header);
-      bytesBuilder.add(blob);
-      bytesBuilder.add([10]); // '\n'
-    }
-
-    // Reset line spacing
-    bytesBuilder.add([27, 50]);
-
-    return bytesBuilder.toBytes();
-  }
 
   /// Prints an image in ESC/POS using Raster Bit Image (GS v 0) mode.
   /// Much faster than line-by-line printing.
-  List<int> quickImage2(
+  List<int> quickImage(
     Image srcImage, {
     PosAlign align = PosAlign.center,
     bool isDoubleDensity = true,
@@ -732,11 +679,6 @@ class Generator {
     Image image = copyResize(srcImage,
         width: targetWidth, interpolation: Interpolation.linear);
 
-    // 3️⃣ Combine transformations:
-    // Rotate 270° → Invert → Flip horizontal
-    // image = copyRotate(image, angle: 270);
-    // image = flipHorizontal(image);
-    // image = invert(image);
 
     // 4️⃣ Convert image to 1-bit black & white
     final bw = Image(width: image.width, height: image.height);
