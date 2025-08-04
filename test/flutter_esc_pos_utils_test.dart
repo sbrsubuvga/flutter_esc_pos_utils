@@ -17,7 +17,7 @@ void main() {
     final Uint8List png = img.encodePng(blackImage);
     final printImage = img.decodeImage(png);
     final start = DateTime.now();
-    generator.quickImage2(srcImage)e(printImage!);
+    generator.quickImage2(printImage!);
     final end = DateTime.now();
     print(end.difference(start));
   });
