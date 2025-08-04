@@ -734,9 +734,9 @@ class Generator {
 
     // 3️⃣ Combine transformations:
     // Rotate 270° → Invert → Flip horizontal
-    image = copyRotate(image, angle: 270);
-    image = flipHorizontal(image);
-    image = invert(image);
+    // image = copyRotate(image, angle: 270);
+    // image = flipHorizontal(image);
+    // image = invert(image);
 
     // 4️⃣ Convert image to 1-bit black & white
     final bw = Image(width: image.width, height: image.height);
